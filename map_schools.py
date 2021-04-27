@@ -30,6 +30,7 @@ from qgis.core import QgsProject, QgsFeature, QgsGeometry, QgsPoint
 from .resources import *
 # Import the code for the dialog
 from .map_schools_dialog import MapSchoolDialog
+from .impact_table import DlgTable
 import os.path
 
 
@@ -251,6 +252,10 @@ class MapSchool:
             ftrNest.setGeometry(buffer)
             prBuffer.addFeatures([ftrNest])
             lyrBuffer.reload()
+
+            dlgTable=DlgTable()
+            dlgTable.show()
+            dlgTable.exec_()
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
             #QMessageBox.information(self.dlg, "Message", "This should run only Ok button clicked")
