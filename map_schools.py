@@ -23,7 +23,7 @@
 """
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication,QDate
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction, QMessageBox
+from qgis.PyQt.QtWidgets import QAction, QMessageBox, QTableWidgetItem
 from qgis.core import QgsProject, QgsFeature, QgsGeometry, QgsPoint
 
 # Initialize Qt resources from file resources.py
@@ -224,6 +224,7 @@ class MapSchool:
         if result:
             lyrNest=QgsProject.instance().mapLayersByName("Raptor Nests")[0]
             lyrBuffer=QgsProject.instance().mapLayersByName("Raptor Buffer")[0]
+            lyrLinear=QgsProject.instance().mapLayersByName("Linear Buffer")[0]
             idxNestId=lyrNest.fields().indexOf("Nest_ID")
             valNestId=lyrNest.maximumValue(idxNestId)+1
             valLat=self.dlg.spbLatitude.value()
@@ -254,6 +255,21 @@ class MapSchool:
             lyrBuffer.reload()
 
             dlgTable=DlgTable()
+            dlgTable.setWindowTitle("Impact Table for School {}".format(valNestId))
+            bb=buffer.boundingBox()
+            linears=lyrLinear.getFeatures(bb)
+            for linear in linears:
+                valID=linear.attribute("Project")
+                valType=linear.attribute("type")
+                valDistance=linear.geometry().distance(geom)
+                if valDistance < valBuffer:
+                    #popuate table with linear data
+                    row=dlgTable.tblImpact.rowCount()
+                    dlgTable.tblImpact.insertRow(row)
+                    dlgTable.tblImpact.setItem(row, 0, QTableWidgetItem(str(valID)))
+                    dlgTable.tblImpact.setItem(row, 1, QTableWidgetItem(str(valType)))
+                    dlgTable.tblImpact.setItem(row, 2, QTableWidgetItem(str("{:4.5f}".format(valDistance))))
+            dlgTable.tblImpact.sortItems(2)
             dlgTable.show()
             dlgTable.exec_()
             # Do something useful here - delete the line containing pass and
